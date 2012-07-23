@@ -1,0 +1,421 @@
+\documentclass[12pt]{article}
+
+\usepackage[latin2]{inputenc}
+\usepackage{t1enc}
+\usepackage[english,magyar]{babel}
+\usepackage{ae}
+\usepackage{aecompl}
+\usepackage{indentfirst}
+\usepackage[paper=a4paper,left=2.5cm,top=2.5cm,right=2.5cm,bottom=2.5cm,nohead]{geometry}
+\usepackage{setspace}
+\usepackage[pdftex]{graphicx}
+\usepackage{epstopdf}
+\usepackage{longtable}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{amssymb}
+\usepackage{hyperref}
+
+\algrenewcommand\algorithmicrequire{\textbf{Bemenet:}}
+\algrenewcommand\algorithmicensure{\textbf{Kimenet:}}
+
+\frenchspacing
+\setlength\parindent{1cm}
+\onehalfspacing
+
+\begin{document}
+
+\author{Engedy Balázs \\ \href{mailto:engedy@db.bme.hu}{\nolinkurl{engedy@db.bme.hu}}}
+\title{Adatbázisok \\ Relációs lekérdezõnyelvek gyakorlat feladatmegoldások} 
+\maketitle{}
+
+\begin{center}
+    \textbf{Figyelem!} Kérlek, mielõtt használod, nézd meg, hátha felkerült még újabb változat a \url{https://twiki.db.bme.hu/twiki/bin/view/Student/Database/Adatbazisok} címre!
+
+    Az észrevételeket és a felfedezett sajtóhibákat a \href{mailto:szarnyas@db.bme.hu}{\nolinkurl{szarnyas@db.bme.hu}} címen várjuk.
+\end{center}
+
+\tableofcontents
+
+\section{Felhasznált relációk}
+
+\subsection{M(unkahelyek) reláció}
+\begin{tabular}{ |l|l|l|l| } \hline
+1: név	 & 2: foglalkozás &  3: munkahely	 & 4: kereset\\ \hline \hline
+Aladár	 & asztalos	 & OBI	 & 1001\\ \hline
+Béla	 & rendõr	 & BRFK	 & 1002\\ \hline
+Cecil	 & fogorvos	 & Rendelõ	 & 1003\\ \hline
+Dezsõ	 & tanár	 & BME	 & 1004\\ \hline
+Elemér	 & tanár	 & ELTE	 & 1005\\ \hline
+Judit	 & fodrász	 & BjutiSzalon	 & 1006\\ \hline
+Kata	 & tanár	 & ELTE	 & 1007\\ \hline
+Lilla	 & igazgató	 & BjutiSzalon	 & 1008\\ \hline
+Mariann	 & rendõr	 & BRFK	 & 1009\\ \hline
+Nóra	 & mûkörmös	 & BjutiSzalon	 & 1010\\ \hline
+\end{tabular}
+
+\subsection{H(ázasságok) reláció}
+\begin{tabular}{ |l|l| }\hline
+1: férj	 & 2: feleség\\ \hline \hline
+Aladár	 & Judit     \\ \hline
+Béla	 & Mariann   \\ \hline
+Elemér	 & Nóra      \\ \hline
+\end{tabular}
+
+\subsection{N(õk) reláció}
+\begin{tabular}{ |l| }\hline
+1: név  \\ \hline \hline
+Judit   \\ \hline
+Kata    \\ \hline
+Lilla   \\ \hline
+Mariann \\ \hline
+Nóra    \\ \hline
+\end{tabular}
+
+\section{Feladatok}
+
+\begin{enumerate}
+\item Kik a relációkban szereplõ férfiak?
+\item Kik az egyedülálló nõk?
+\item Mely házaspároknál keres a nõ jobban?
+\item Melyek foglalkozásokat ûzi mindkét nem?
+\item A Bjútiszalonban dolgozó nõk férjei?
+\item Kik a házasságban élõ tanárok?
+\item Melyek azok a foglalkozások, amelyeket legalább ketten ûznek?
+\item Melyek azok a foglalkozások, amelyeket csak egy-egy ember ûz?
+\end{enumerate}
+
+\section{Sor- és oszlopkalkulus}
+
+\subsection{Bevezetés}
+
+Az sor- és oszlopkalkulus két, az elsõrendõrendû logikához\footnote{Ezt tanultátok pl.\ Mesterséges Intelligencia tárgyból.} nagyon hasonló relációs lekérdezõnyelv. A velük kapcsolatos legfontosabb tudnivaló, hogy a könyvbéli õket leíró 40., 43.\ oldaltól nem szabad megijedni. Itt mindössze formalizáltunk valami nagyon hasonlót ahhoz, amit középiskolai, egyetemi tanulmányaitok során már rengetegszer láttatok és használtatok matematikai állítások, bizonyítások leírásakor.
+
+További kérdéseket vethet fel a könyvbeli bevezetésnél a formalizmus (milyen karaktersorozatok legálisak) és a jelentés (mit jelentenek a karaktersorozatok) szétválasztása. Ez két szempontból is indokolt: egyrészt ez a jelentéshozzárendelés teljesen önkényes, akár más jelentést is rendelhetnénk hozzá a karaktersorozatokhoz. Másrészt, ha úgy tetszik, ezt rendre meg is tesszük. Esetünkben pl.\ a $R^{(3)}(1,2,3)$ atomi formulához az ``igaz'' értéket rendeljük, ha jelenlegi pillanatban az $R$ alaprelációink a $\left\{(1,2,2),(1,2,3),(2,3,4)\right\}$ reláció, de a ``hamis'' értéket, ha $R=\left\{(2,3,4),(3,4,5)\right\}$. Tehát a jelentést befolyásolják a formulákban elõforduló alaprelációk pillanatnyi értékei.
+
+Mi is van tehát pontosan a könyv 40.~oldalán?
+%
+\begin{description}
+	\item[Szimbólumok] Egy nyelv formális leírásakor minden alulról felfelé építkezünk: elõször megadjuk a legalacsonyabb szintû építõelemek, az ún. szimbolúmok halmazát. Ezzel mindössze annyi a célunk, hogy pontosan rögzítsuk, egy sor-/oszlopkalkulus formula milyen ``karakterek'' sorozata lehet.	
+	\item[Atomok] Ez a következõ szint, õk lesznek a legkisebb elemek, amikhez a jelenetés megadásakor konkrét igazságértékek (igaz, hamis) fognak rendelõdni. Például az $R^{(4)}(v^{(4)})$ atomhoz akkor fogjuk az ``igaz'' értéket rendelni, ha $v^{(4)} \in R^{(4)}$ relációnak.
+	\item[(Összetett) formulák] Ez lesz a legmagasabb szint, amihez igazságértékeket fogunk rendelni a jelentés megadásakor. Minden atom egyben formula, illetve (rekurzívan) formulákat logikai összekötõkkel (és, vagy) összekapcsolva, illetve kvantálva is formulát fogunk kapni. A formulákban vannak olyan változók, amelyek kvantor hatáskörében állnak, és vannak olyanok, amelyek nem. Utóbbiak az ún.\ \emph{szabad} változók, ezek értékét külön meg kell adni, hogy lehetséges legyen az adott formulát egy bool-értékké kiértékelni.
+	\item[Kifejezés] Ez a legfelsõ szint. A jelentésben ehhez nem igazságértékeket, hanem egy halmazt fogunk rendelni, mégpedig azt, amelyik a jobb oldalon (a $|$ után) szereplõ formula szabad változóinak olyan behelyettesítésiérték-kombinációt tartalmazza (ennesekként), amelyre a formula igaz.
+	
+\end{description}
+
+\subsection{Sorkalkulus}
+
+\subsubsection{Kik a relációkban szereplõ férfiak}
+\label{sss:oszlopelem}
+
+Egy névlistára vagyunk kíváncsiak, tehát az eredményhalmazban egydimenziós ennesek (n-esek) lesznek, ezek legyártásához egydimenziós sorváltozóra van szükség. Tegyük fel, hogy minden férfi szerepel a \verb+Munkahelyek+ relációban is (ez most igaz). Ekkor a kívánt eredményhalmazt elõállító \emph{sorkalkulus kifejezés}:
+%
+$$ \{ s^{(1)} | \left(\exists u^{(4)} M^{(4)}(u^{(4)}) \wedge u[1]=s[1]\right) \wedge \neg \left( \exists v^{(1)} N^{(1)}(v^{(1)}) \wedge v[1]=s[1] \right)  \}$$
+%
+A fenti értelmezése: az eredményhalmazban azok az $s^{(1)}$ értékek szerepelnek, melyekre az alábbi mindkét állítás (\emph{részformula}) igaz:
+\begin{enumerate}
+	\item $\left(\exists u^{(4)} M^{(4)}(u^{(4)}) \wedge u[1]=s[1]\right)$: azaz az adott $s^{(1)}$-hez tudunk találni egy olyan $u^{(4)}$-et\footnote{Azaz e részformula kiértékelése elõtt rögzítjük azt a bizonyos $s^{(1)}$-et, amire el akarjuk dönteni, hogy benne van-e az eredményhalmazban, és az értéket fixen tartva értékeljük ki a kvantoros kifejezést.}, hogy $u^{(4)}$ benne van az $M^{(4)}$ relációban, és elsõ komponense (név) megegyezik az $s^{(1)}$ elsõ komponensével. Azaz, másképp fogalmazva: szerepel az $M^{(4)}$ relációban egy olyan négyes, aminek az elsõ komponense $s^{(1)}$, azaz: az $M^{(4)}$ reláció elsõ oszlopában szerepel $s^{(1)}$, tehát $s^{(1)}$ egy név.
+	\item $\neg \left(\exists v^{(1)} N^{(1)}(v^{(1)}) \wedge v[1]=s[1]\right)$: az elõbbihez hasonlóan, csak itt nem létezést állítunk, azaz nem találunk az adott $s^{(1)}$-hez egy olyan $v^{(1)}$-et, hogy $v^{(1)}$ benne van az $N^{(1)}$ relációban, és elsõ komponense megegyezik az $s^{(1)}$ elsõ komponensével. Azaz nem szerepel az $N^{(1)}$ relációban egy olyan érték, aminek az elsõ (és itt egyetlen) komponense $s^{(1)}$ elsõ komponensével egyezik meg, azaz: az $N^{(1)}$ reláció elsõ (és egyetlen) oszlopában nem szerepel $s^{(1)}$, tehát $s^{(1)}$ nem egy nõi név.	 
+\end{enumerate}
+És valóban: ha egy név nem nõi név, akkor férfi név.
+
+Láthatjuk tehát, hogy a fentiekhez hasonló felépítésû, kvantoros részformulával írhatjuk le azt az elvárást, hogy egy sorváltozó egy komponense eleme legyen egy reláció adott oszlopának. Biztos, hogy kell ez a bonyolítás!? Nos, az elsõ részformulánál mindenképp. Bármennyire is csábító lenne leírni, hogy $M^{(4)}(s^{(1)})$, ez szintaktikai hibás, mivel a reláció és a sorváltozó dimenziója nem egyezik meg, ilyen atomot a sorkalkulus nyelve nem engedélyez.
+
+A második esetben viszont azonosak a dimenziók, valóban egyszerûsíthetjük a kifejezés felírását:
+%
+$$ \{ s^{(1)} | \left(\exists u^{(4)} M^{(4)}(u^{(4)}) \wedge u[1]=s[1]\right) \wedge \neg N^{(1)}(s^{(1)}) \}$$
+%
+Ez továbbra is ugyanazt az eredményhalmazt állítja elõ, de most közvetlenül fogalmaztuk meg $s^{(1)}$-rõl, hogy nem eleme $N^{(1)}$-nek.
+
+\subsubsection{Kik az egyedülálló nõk}
+
+Ugyanaz a feladat, mint az elõbb, csak most az 1-aritású relációnak eleme az egydimenziós sorváltozó, és egy több-aritású másik reláció adott oszlopában nem szerepelhet:
+%
+$$ \{ s^{(1)} | \neg \left(\exists u^{(2)} H^{(2)}(u^{(2)}) \wedge u[2]=s[1]\right) \wedge N^{(1)}(s^{(1)}) \}$$
+%
+
+\subsubsection{Mely házaspároknál keres a nõ jobban}
+\label{sss:illesztes}
+
+Ahogy a megfogalmazásban is tükrözõdik, itt már házas\emph{párokat}, tehát kételemû enneseket kell eredményül szolgáltatnunk, így kétdimenziós sorváltozóval generáljuk az eredményhalmazt:
+%
+$$ \{ s^{(2)} | \left(H^{(2)}(s^{(2)})\right) \wedge \left(\exists u^{(4)}, v^{(4)} M^{(4)}(u^{(4)}) \wedge M^{(4)}(v^{(4)}) \wedge u[1]=s[1] \wedge v[1]=s[2] \wedge u[4] < v[4] \right)  \}$$
+%
+Értelmezzük ezt a kifejezést: az eredményhalmazban azok az $s^{(2)}$ párok szerepelnek, melyekre az alábbiak mindegyike igaz:
+\begin{enumerate}
+	\item $\left(H^{(2)}(s^{(2)})\right)$: azaz a vizsgált $s^{(2)}$ a $H^{(2)}$ reláció eleme, tehát egy házaspárt ír le.
+	\item $\left(\exists u^{(4)}, v^{(4)} M^{(4)}(u^{(4)}) \wedge M^{(4)}(v^{(4)}) \wedge u[1]=s[1] \wedge v[1]=s[2] \wedge u[4] < v[4] \right)$: tehát az adott $s^{(2)}$-hoz találunk olyan $u^{(4)}$ és $v^{(4)}$ sorvektorokat\footnote{mégpedig egyértelmûen, mivel a név egyértelmûen azonosít egy munkavállalót esetünkben}, hogy ezek mindketten az $M^{(4)}$ reláció elemei, elsõ komponensük rendre megegyezik $s^{(2)}$ elsõ, illetve második komponensével, és negyedik komponensük között pedig ``kisebb'' aritmetikai reláció áll fenn. Másképp fogalmazva: létezik az $M^{(4)}$ relációnak két olyan sora, hogy az egyik (``név'' alapján) az adott házaspár férfi tagjához, a másik pedig a nõi tagjához tartozik, és a feleséget leíró négyesben a kereset értéke több, mint a férjet leíróban.\footnote{Ne feledjük, e részformula kiértékelésekor az $s^{(2)}$ változó (amely egyébként a részformula ún.\ \emph{szabad} változója) értékét rögzítjük, tehát egy rögzített $s^{(2)}$-re kell ``végigpróbálgatni'', hogy létezik-e megfelelõ $u^{(4)}$ és $v^{(4)}$. Természetesen a próbálgatást összességében ``minden'' $s^{(2)}$-re el kell végezni, de minden $s^{(2)}$-re külön ``ciklusban'' keresünk $u$ és $v$-ket.} Tehát az $s^{(2)}$ házaspár nõ tagja többet keres a férfinél.
+\end{enumerate}
+%
+Vegyük észre, hogy a második részformulában nem mást valósítottunk meg, mint két illesztést: a \verb+Házasságok+ reláció soraihoz illesztettük duplán a \verb+Munkahelyek+ reláció sorait, egyszer a ``férj--név'', másodszor a ``feleség--név'' attribútumok mentén. (Tehát minden házaspárt leíró ennest kiegészítettük az egyes tagok munkaviszonyát leíró attribútumértékekkel.) Ezek után már könnyen megadhattuk a szelekciós feltételt az aritmetikai reláció személyében -- az ``illesztett'' adatokra vonatkozóan.
+
+\subsubsection{Melyek foglalkozásokat ûzi mindkét nem}
+
+Itt a \verb+Munkahelyek+ reláció második oszlopának azon elemeit kell kigyûjteni (lásd: \ref{sss:oszlopelem}. szerint), amelyhez tartozik két olyan \verb+Munkahelyek+-beli ennes, hogy az egyik név szerint egy férfihoz, a másik egy nõhöz illeszthetõ (lásd: \ref{sss:illesztes}). (Nem kell megijedni az esetleges négyszeres kvantálástól!)
+
+\subsubsection{A Bjútiszalonban dolgozó nõk férjei}
+
+A \verb+Házasságok+ és \verb+Munkahelyek+ reláció illesztését, szûrését, majd vetítését megvalósító sorkalkulus-kifejezést kell alkotni, a fentiekben ismertetettekhez hasonlóan.
+
+\subsubsection{Kik a házasságban élõ tanárok}
+
+Az elõbbiekhez hasonlóan. Kihasználhatjuk, hogy atomokból legózzuk össze az ``illesztéseket'', így könnyen tudunk egy olyan illesztést készíteni, hogy az egyik relációbeli enneshez a másik relációból egy olyan ennest illesztünk, hogy utóbbinak egyik VAGY másik attribútuma megegyezik elõbbi egy attribútumával.
+
+\subsubsection{Melyek azok a foglalkozások, amelyeket legalább ketten ûznek}
+
+A következõ módon okoskodunk: azok a foglalkozások, amelyeket legalább ketten ûznek, a \verb+Munkahelyek+ reláció második oszlopában legalább kétszer fognak szerepelni, mégpedig úgy, hogy mellettük az elsõ oszlopban más-más név áll.
+
+Tehát az eredményhalmazban azok az $s^{(1)}$ foglalkozások szerepelnek, amelyekhez találunk a \verb+Munkahelyek+ relációban két olyan $u^{(4)}$ és $v^{(4)}$ sort, hogy bennük azonos foglalkozás (2. attribútum), de különbözõ ember neve (1. attribútum) szerepel (ezzel már kiküszöböljük azt a helyzetet is, amikor a két kvantor ugyanazt a rekordot ``választaná be'', ezt így nem kell külön ellenõrizni):
+%
+$$ \{ s^{(1)} | \left(\exists u^{(4)}, v^{(4)} M^{(4)}(u^{(4)}) \wedge M^{(4)}(v^{(4)}) \wedge u[1]\neq v[1] \wedge u[2]=v[2] \wedge s[1] = u[2]\right)  \}$$
+%
+
+\subsubsection{Melyek azok a foglalkozások, amelyeket csak egy-egy ember ûz}
+
+Az elõzõ halmaz komplementere az összes foglalkozásra nézve, a formulát negálva kapható:
+%
+$$ \{ s^{(1)} | \left(\exists u^{(4)} M^{(4)}(u^{(4)}) \wedge s[1] = u[2]\right) \wedge \neg \Phi(s^{(1)}) \}$$
+%
+ahol $\Phi(s^{(1)})$ az elõzõ feladatban szereplõ formula. A bal oldali részformula azért kell, hogy valóban csak azokat a \emph{foglalkozásokat} kapjuk meg, amit csak egy-egy ember ûz, és ne \emph{mindent}, ami nem egy két ember által ûzött foglalkozás.
+
+\subsection{Oszlopkalkulus}
+\label{sse:oszlopkalkulus}
+
+Lássuk, miben is különbözik egy oszlopkalkulus-kifejezés egy sorkalkulus-kifejezéstõl!
+%
+\begin{itemize}
+	\item Vektorváltozók ($s^{(n)}$) helyett skalárváltozókat ($u,v,w,\dots{}$) használunk. Például egy $s^{(n)}$  sorváltozót n~darab skalár oszlopváltozóval, $u_1, u_2, ..., u_n$-nel helyettesítünk, melyek az eredeti vektorváltozó komponenseinek felelnek meg. De természetesen a skalárok átrendezhetõségének, tetszõleges kombinálhatóságának köszönhetõen ennél sokkal rugalmasabb kifejezésekben gondolkodhatunk.
+	\item Ennek megfelelõen $R^{(n)}\left(u_1, u_2, \dots{}, u_n\right)$ módon jelölhetjük, hogy az $u_i$-kból képzett ennes eleme az $R$ relációnak.
+	\item Indexelésre ($s^{(n)}[i]$) nincs továbbá szükségünk, hiszen egy-egy oszlopváltozó épp a sorváltozó egy-egy komponensének, attribútumának felel meg.
+	\item Végül a kifejezésben az egyetlen sorváltozó helyett oszlopváltozók egy sorozatával generáljuk az eredményhalmazt: $ \{ u_1, \dots{}, u_n | \Psi\left( u_1, \dots{}, u_n \right) \}$. Az eredményben pontosan azok az $(u_1, \dots{}, u_n)$ ennesek lesznek, melyeknek $u_i$ komponenseit (egyszerre) $\Psi$-be helyettesítve az igaznak adódik.
+\end{itemize}
+%
+
+\subsubsection{Kik a relációkban szereplõ férfiak}
+\label{sss:oszlopelem2}
+
+\Aref{sss:oszlopelem}.~fejezetben tárgyalt sorkalkulusnak- megfelelõ oszlopkalkulus-kifejezés:
+%
+$$ \{ t | \left(\exists u,v,w: M^{(4)}(t, u, v, w) \right) \wedge \neg N^{(1)}(t) \}$$
+%
+A fenti értelmezése: az eredményhalmazban azok a $t$ értékek szerepelnek, melyekre az alábbi mindkét állítás (\emph{részformula}) igaz:
+\begin{enumerate}
+	\item $\left(\exists u,v,w: M^{(4)}(t, u, v, w) \right)$: azaz az adott $t$-hez tudunk találni olyan $u$, $w$ és $w$-t, hogy az ezekbõl alkotott négyes benne van az $M^{(4)}$ relációban. Azaz, másképp fogalmazva: szerepel az $M^{(4)}$ relációban egy olyan négyes, aminek az elsõ komponense $t$, azaz az $M^{(4)}$ reláció elsõ oszlopában szerepel $t$, tehát $t$ egy név.	
+	\item $\neg N^{(1)}(t)$: az $N^{(1)}$ reláció elsõ (és egyetlen) oszlopában nem szerepel $t$, tehát $t$ nem egy nõi név.	
+\end{enumerate}
+
+Figyeljük meg, hogy a sorkalkulust használó megoldással ellentétben az elsõ részkifejezésben a \verb+Munkahelyek+-beli elsõ attribútumra vonatkozóan nem kell új segédváltozót felvennünk, amelyet aztán a kvantált részformulában egyenlõvé kell tenni a kívülrõl érkezõ változóval, hanem közvetlenül a kívülrõl érkezett változót használjuk.
+
+\subsubsection{Kik a házasságban élõ tanárok}
+%
+A kívánt eredményhalmazt adó kifejezés:
+$$ \{ t | \left(\exists u,v,w: M^{(4)}(t, u, v, w) \wedge u = \mbox{'\emph{tanár}'} \right) \wedge \left(\exists s: H^{(2)}(s,t) \vee H^{(2)}(t,s) \right)  \}$$
+%
+Értelmezése: az eredményhalmazban azok a $t$ értékek szerepelnek, melyekre tudunk találni olyan $u$, $w$ és $w$-t, hogy az ezekbõl alkotott négyes az $M^{(4)}$ reláció egy olyan sorát képzi, ahol a 2. attribútum az, hogy 'tanár' (ez szûr arra, hogy $t$ egy tanár neve legyen), illetve tudunk $t$-hez egy olyan $s$-t találni, hogy valamilyen sorrendben, $(s,t)$ vagy $(t,s)$ ennes benne legyen a \verb+Házasságok+ relációban, azaz  $t$ egy férj vagy feleség neve legyen. Azok a $t$-k, amelyekre mindkét állítás igaz, lesznek a házas tanárok nevei.
+
+\subsubsection{A Bjútiszalonban dolgozó nõk férjei}
+\label{sss:bjuti}
+%
+A kívánt eredményhalmazt adó kifejezés:
+$$ \{ t | \left(\exists s,u,v,w: M^{(4)}(s, u, v, w) \wedge v = \mbox{'\emph{Bjútiszalon}'} \wedge H^{(2)}(t,s) \right)  \}$$
+%
+Értelmezése: az eredményhalmazban azok a $t$ férfinevek szerepelnek, melyekhez tudunk találni olyan $s$, $u$, $v$ és $w$ értékeket, hogy az $(s,u,v,w)$ négyes egy olyan munkavállaló adatait írja le, hogy a munkahelye a 'Bjútiszalon', és ez munkavállaló egy olyan házastársi kapcsolat ``feleség'' oldalát adja, ahol a férj a $t$.
+
+Figyeljük meg, hogy lényegében egy illesztést végeztük el: a \verb+Munkahelyek+ reláció egy sorához illesztettük a ``név--feleség'' attribútumok mentén a \verb+Házasságok+ reláció egy sorát. Ugyanakkor míg a \aref{sss:illesztes}.~fejezetben leírt sorkalkulusos megoldásban két, eredetileg független változót vettünk fel a két illesztendõ relációhoz, majd a reláció megfelelõ elemeit egy külön egyenlõségvizsgálattal kapcsoltuk össze, addig itt az megfelelõ rekordok összekapcsolása implicite adódik abból, hogy ugyanazt az oszlopváltozót használtuk fel az $M$ és $H$-beli ennesek kijelölésére.
+
+\section{Biztonságos sorkalkulus}
+\label{sec:biztonsagos}
+
+Elevenítsük fel, hogyan is definiáltuk a biztonságos kifejezések fogalmát!
+
+\newtheorem{mydef}{Definíció}
+\begin{mydef}
+Egy $\{t|\Psi(t)\}$ kifejezés biztonságos, ha:
+\begin{enumerate}
+	\item[(i.)] $\forall t$ esetén, ahol $\Psi(t)$ igaz, $t$ minden komponense $DOM\left(\Psi\right)$-beli.
+	\item[(ii.)] a \emph{részformulák biztonságosok}, azaz $\Psi$ minden $\exists u \omega(u)$ részformulájára fennáll, hogy $\forall u$ esetén, ahol $\omega(u)$ igaz, az $\omega$-beli szabad változók valamely értéke mellett, akkor $u$ minden komponense $DOM\left(\omega\right)$-beli.
+\end{enumerate}
+\end{mydef}
+
+\begin{mydef}
+Egy $\Psi(t)$ formula $DOM\left(\Psi\right)$ doménje egy olyan halmaz, amely tartalmazza:
+\begin{enumerate}
+	\item[(i.)] a $\Psi(t)$-ben található alaprelációk valamennyi attribútumának értékeit és
+	\item[(ii.)] a $\Psi(t)$-ben elõforduló konstansokat.
+\end{enumerate}
+\end{mydef}
+
+Elõször is vegyünk észre egy általános érvényû állítást. Ha egy kifejezés biztonságos, akkor véges sok helyettesítés teszi igazzá, és végtelen\footnote{Kvázi-végtelen, hisz teljes vizsgálódásunkat korlátozza az interpretációhoz választott $A$ alaphalmaz mérete. De ha csupán ennek növelésével nõ egy halmaz mérete (mert korábban csak azért nem tartalmazott egy elemet, mert az nem volt benne $A$-ban), azt ilyen tekintetben ``végtelen''-nek vesszük. Ilyen tekintetben ``véges''-nek nevezünk egy halmazt, ha mérete nem $A$ miatt korlátozott.} sok helyettesítés nem. Így ha benne a formulát negáljuk, akkor végtelen sok helyettesítés fogja igazzá tenni, és csak véges sok nem.
+
+Tehát egy biztonságos kifejezés formuláját negálva nem biztonságos kifejezést kapunk. Hasonló igaz a részformulák biztonságosságára is.
+
+Az állítás visszafelé viszont nem igaz, nem biztonságos formulát negálva nem feltétlen lesz biztonságos, hisz elképzelhetõ, hogy mind az õt igazzá tevõ, mind pedig az õt igazzá nem tevõ helyettesítések halmaza is végtelen volt (pl: $\Psi(x) = \left((x \% 2) = 0\right)$), vagy tartalmazhat továbbra is nem biztonságos részformulát (s így a \emph{(ii.)} feltételt sérti).
+
+Most a feladatban megadott formulákból felépített kifejezések biztonságosságát fogjuk vizsgálni. Ennek eldöntéséhez célszerû egyszerûen a definíció alapján dolgozni, azaz megvizsgálni, hogy a két követelmény teljesül-e.
+
+\subsection{Kvantor nélküli kifejezések}
+
+Itt tehát nincs kvantort tartalmazó részformula, tehát csak az \emph{(i.)} feltétel teljesülését kell vizsgálni.
+
+\begin{itemize}
+	\item $\{ s^{(m)} | s^{(m)}[1]< 3 \}$ \\
+	Nem biztonságos, hisz végtelen sok olyan ennes van, amelynek elsõ komponense 3-nál kisebb, így végtelen nagy az eredményhalmaz (az \emph{(i.)} feltétel nem teljesül). A domén egyébként a $\{3\}$ halmaz.
+	\item $\{ s^{(m)} | R^{(m)}(s^{(m)}) \wedge s^{(m)}[1] = 3 \}$ \\
+	Ez a kifejezés biztonságos, hisz a formulájában olyan ÉS-kapcsolat van, amelynek elsõ operandusát csak $R^{(m)}$-beli $s^{(m)}$-ek elégíthetik ki, amelyek elemei viszont definíció szerint benne vannak a formula doménjében, hiszen az tartalmazza a benne szerepelõ alaprelációk minden elemét. Így az \emph{(i.)} feltétel teljesül, és ez most kvantort tartalmazó részformula hiányában elég is.
+	\item $\{ s^{(m)} | R^{(m)}(s^{(m)}) \wedge s^{(m)}[1] < 3 \}$ \\
+	Ugyanúgy biztonságos.
+	\item $\{ s^{(m)} | R^{(m)}(s^{(m)}) \wedge \neg \left( s^{(m)}[1] = 3 \right) \}$ \\
+	Ugyanúgy biztonságos. Látható, hogy az $R^{(m)}(s^{(m)})$ részformula annyira ``biztos'', hogy bármi kvantormenteset\footnote{hogy a \emph{(ii.)} feltételt ne rontsa el} is hozunk vele ÉS-kapcsolatba, a kifejezés biztonságos marad. Hiszen bármit is írunk az $R^{(m)}(s^{(m)}) \wedge$ mellé, a doménnek ugyanúgy részét fogja kérdezni $R^{(m)}$ minden eleme, e reláción kívüli $s^{(m)}$ pedig továbbra sem elégítheti ki a formulát (az ÉS-kapcsolat miatt).
+	\item $\{ s^{(m)} | \neg R^{(m)}(s^{(m)}) \wedge s^{(m)}[1] = 3 \}$ \\
+	A biztonságosság az $m$ értékétõl függ. Ha $m=1$, akkor biztonságos, hisz $s^{(1)}$ csak a konstans $3$ értéket veheti fel, és  $3 \in DOM = \{3\} \bigcup R$. Ha $m > 1$, akkor nem biztonságos, hisz az egyenlõség csak $s^{(m)}$ elsõ komponensét köti, a többi komponense bármilyen $R^{(m)}$-en kívüli lehet, ami végtelen nagy eredményhalmazt jelent.
+\end{itemize}
+
+\subsection{Kvantort tartalmazó kifejezések}
+\begin{itemize}
+	\item $\{ x | R(x) \wedge \left( \exists z: x = z \right) \}$ \\
+	Látható, hogy a kvantoros részformula a végeredmény tekintetében nem sok vizet zavar, a biztonságosság szempontjából annál fontosabb. Bár az \emph{(i.)} feltételt teljesíti a kifejezés, hisz az eredményhalmaz épp az $R$ reláció lesz, van viszont egy $\exists u \omega(u)$ alakú részformula, amelynek doménje az üres halmaz (hoppá!, nincs benne sem konstans, sem reláció), miközben $z=x$ teljesíti, így a \emph{(ii.)} feltétel meghiúsul, a kifejezés nem biztonságos.
+	
+		\item $\{ x | \left( \exists z: R(x) \wedge x = z \right) \}$ \\
+	Az eredményhalmaz ugyanúgy megegyzik $R$-rel, és az $R(x)$ feltétel miatt már a belsõ részformula is csak olyan $z$-kre igaz, amelyek $R$-beliek, miközben a részformula doménje meghízott, $DOM=R$ lett, így mindkét feltétel teljesül, a kifejezés biztonságos. Ellentétben az elõbbivel, mialatt ugyanazt az eredményhalmazt állítják elõ!		
+\end{itemize}
+
+\subsection{Összetett kifejezések}
+
+Az alábbi részformulákat fogjuk $\exists y: \Phi(x,y)$, $\exists y: \Psi(x,y)$, $\exists y: \Omega(x,y)$ alakban beépíteni az összetett kifejezésekbe. Az így kapott kvantoros részformulák akkor lesznek biztonságosak (így az összetett kifejezés biztonságosságához szükséges \emph{(ii.)} feltételt akkor nem rontják el), ha a $\Phi$, $\Psi$ és $\Omega$ formulák rendre csak olyan $y$-okra teljesülhetnek, amelyek benne vannak a doméjükben (tehát $x$-szel nem foglalkozunk). A domén mindenütt $DOM= \pi_1(R_1) \bigcup \pi_2(R_1) \bigcup \{0\}$.
+
+\begin{itemize}
+	\item $\Phi(x,y) = R_1(x,y) \wedge y>0$ \\
+	Biztonságos részformulát\footnote{Tehát a belõle képzett $\exists y: \Phi(x,y)$ részformula \emph{biztonságos részformula} lesz.} fog adni, mert $R_1(x,y)$-et tartalmazza ÉS-kapcsolatban, így csak $R_1$-beli (s így doménbeli) y-okra teljesühet. Negáltja ebbõl következõen nem biztonságos\footnote{Tehát a belõle képzett $\exists y: \neg \Phi(x,y)$ részformula nem lesz \emph{biztonságos}.}.
+	
+	\item $\Psi(x,y) = \neg R_1(x,y) \vee y>0$ \\
+	Ez a relációjel megfordításától eltekintve az elõzõ negáltja (De Morgan azonosság), tehát nem biztonságos részformulát fog adni, de a negáltja igen.
+	
+	\item $\Omega(x,y) = R_1(x,y) \vee y>0$ \\
+	Végtelen sok $y$ igazzá teszi (a VAGY-kapcsolat miatt), így nem fog biztonságos részformulát adni. Negáltja $\neg R_1(x,y) \wedge y<=0$, ezt is végtelen sok $x,y$ igazzá teszi, tehát a negáltja esetén sem lesz biztonságos.
+
+\end{itemize}
+
+Lássuk tehát, hogy ha a fentiekbõl különféle $\Theta(x)$ összetett formulákat építünk, akkor az ezekbõl képzett $\{ x | \Theta(x) \}$ kifejezés mikor biztonságos. Minden esetben: $$DOM(\Theta) = \pi_1(R_1) \bigcup \pi_2(R_1) \bigcup R_2 \bigcup \{0\}$$.
+
+\begin{itemize}
+	
+	\item $\Theta(x) = R_2(x) \wedge \exists y: \Phi(x,y)$ \\
+	Biztonságos lesz, hiszen az eredményhalmaz a bal oldal miatt legfeljebb az $R_2$-ben lévõ $x$-eket tartalmazhatja (\emph{(i.)} feltétel O.K.), és az elõbb megvizsgáltuk, hogy az $\Phi$-bõl képzett kvantoros részformula biztonságos lesz (\emph{(ii.)} feltétel O.K.).
+	
+	\item $\Theta(x) = R_2(x) \wedge \exists y: \Psi(x,y)$ \\
+	Nem biztonságos, hiszen az elõbb megvizsgáltuk, hogy az $\Psi$-bõl képzett kvantoros részformula nem biztonságos, így a \emph{(ii.)} feltétel nem teljesül.
+	
+	\item $\Theta(x) = R_2(x) \wedge \forall y: \Phi(x,y)$ \\
+	Az univerzális kvantorról nem szól a fáma, alakítsuk át egzisztenciális kvantorrá: $R_2(x) \wedge \neg \exists y: \neg \Phi(x,y)$. Láttuk azonban, hogy $\Phi$ negáltja elé egzisztenciális kvantort írva nem biztonságos részformulát kapunk, tehát a \emph{(ii.)} feltétel nem teljesül, a kifejezés nem biztonságos.
+	
+	\item $\Theta(x) = R_2(x) \wedge \forall y: \Psi(x,y)$ \\
+	Hasonlóan átalakítva kapható, hogy mivel $\Psi$ negáltját kvantálva biztonságos részformula adódik, a kifejezés is biztonságos.
+	
+	\item $\Theta(x) = \neg R_2(x) \wedge \exists y: \Phi(x,y)$  \\
+	\textbf{Figyelem!} Ennél, és azt ezt követõ kifejezéseknél már az \emph{(i.)} feltétel teljesülését nem garantálja egy fix $R_2(x)$ tag, a véges eredményhalmazról is a kvantort tartalmazó részformulának kell gondoskodni. A $\Phi$-ben lévõ $R_1(x,y)$ $x$ értékét is megköti, tehát \emph{(i.)} teljesül, és \emph{(ii.)} változatlanul fennáll, tehát a kifejezés biztonságos.
+	
+		\item $\Theta(x) = \neg R_2(x) \wedge \exists y: \Psi(x,y)$ \\
+	Nem biztonságos, a részformula továbbra is elrontja a \emph{(ii.)} feltételt.
+	
+	\item $\Theta(x) = \neg R_2(x) \wedge \forall y: \Phi(x,y)$ \\
+	Nem biztonságos, a részformula továbbra is elrontja a \emph{(ii.)} feltételt.
+	
+	\item $\Theta(x) = \neg R_2(x) \wedge \forall y: \Psi(x,y)$ \\
+	\textbf{Figyelem!} Ez már így nem biztonságos! Átírva egzisztenciális kvantorra és behelyettesítve:
+%
+$$\neg R_2(x) \wedge \neg \exists y: R_1(x,y) \wedge y\le0$$
+%
+Azt állítjuk, hogy ez minden $R_2 \bigcup \pi_1(R_1)$-en kívüli $x$-re igaz lesz. A kvantoron kívüli részformula ilyen $x$-re nyilvánvalóan igaz, és hiába keresünk, nem találunk olyan $y$-t, hogy $R_1(x,y) \wedge y\le0$ teljesüljön, hiszen az $x$-ek miatt $R_1(x,y)$ sosem lesz igaz (mindazokat az $x$-eket kizártuk, amelyek $R_1$ elsõ oszlopában szerepelhetnének). Így minden ilyen $x$-re $\neg \exists y: R_1(x,y) \wedge y\le0$ is igaz, tehát $x$-et már semmi nem köti meg, az eredményhalmaz ``végtelen'' lesz, az \emph{(i.)} feltétel nem teljesül.
+\end{itemize}
+
+\subsubsection*{Mely formulák negáltja biztonságos?}
+
+Itt az egész $\Theta(x)$ formulák negálására kell gondolni. Az elsõ négy formula negáltjának bal oldalán szerepelni fog egy ``$\neg R_2(x) \vee$'' tag (De Morgan azonosság!), ami végtelenné teszi az eredményhalmazt, tehát ezek nem lesznek biztonságosak.
+
+Az ötödikre alkalmazhatjuk a fejezet elején ismertetett szabályt: biztonságos kifejezés negáltja nem biztonságos.
+
+A maradék háromra pedig a fenti vizsgálatot elvégezve azt kapjuk, hogy a hatodik és a hetedik nem, de a nyolcadik immár biztonságos lesz!
+
+\subsubsection*{A $\Phi$ és $\Psi$ részformulákat $\Omega$-val helyettesítve hány biztonságos kifejezést kapunk?}
+
+A nyolc közül egyik sem lesz biztonságos, hisz láttuk, hogy az $\exists y \Omega(x,y)$ és az $\exists y \neg \Omega(x,y)$ sem biztonságos részformula, így a \emph{(ii.)} feltétel nem teljesül.
+
+
+%Mely formulák negáltja biztonságos:
+%az elsõ öt negáltja nem lesz biztonságos, mert vagy a ponált az volt, vagy ¬R(2) található benne 'vagy' elõtt
+%a hatodik-hetedik nem lesz biztonságos, mert diszjunkció lesz,és a jobb fele lenegálva (figyelem, kvantor átpofozódik) nem fixálja le a változót
+%a nyolcadik viszont immár biztonságos, mert ¬? egzisztenciálisan lesz kvantálva benne.
+%A ? vagy ? helyettesítve ?-vel hány biztonságos formulát kapunk: egyet se, mert sem ?, sem negáltja nem biztonságos, azaz van nem biztonságos részkifejezés
+
+
+
+
+\section{Gondolkodtató feladatok}
+
+Ezek a feladatok, ahogy a nevükbõl is látszik, arra szolgálnak, hogy átgondoljátok az anyagot, felfedezzetek érdekes összefüggéseket, trükkös megoldásokat! Így e megoldások referencia jelleggel szerepelnek itt, mindenkinek erõsen javaslom, hogy elõször mindenképpen gondolkodjon a kérdéseken, és csak azután vesse össze megoldását azzal, ami itt olvasható!
+
+\subsubsection*{Mi az összefüggés egy kifejezés biztonságossága és az eredményhalmaz számossága között?}
+\Aref{sec:biztonsagos}.~fejezetben átismételtük a biztonságosság definícióját, mely azt mondta ki, hogy a biztonságosság egyik szükséges feltétele, hogy az eredményhalmazban minden ennes minden eleme a doménbõl való legyen, ami egy (matematikai értelemben vett) véges halmaz, így a megoldások száma is véges.
+
+Ugyanakkor a véges eredményhalmaz nem elégséges feltétel, hisz egyrészt korántsem biztos, hogy a véges sok ennes a fõformula doménjébõl való, de még ha onnan is való, egy nem biztonságos részformula akkor is nem biztonságossá teheti az egész kifejezést. Tehát:
+$$\mbox{biztonságos} \Rightarrow \mbox{véges}$$
+$$\mbox{biztonságos} \nLeftarrow \mbox{véges}$$
+
+\subsubsection*{Mi a legprimitívebb algoritmus, amit el tudsz képzelni egy biztonságos sorkalkulus kifejezés eredményhalmazának elõállítására?}
+
+Ha a kifejezés biztonságos, az eredményhalmazban legfeljebb $DOM$-beli elemekbõl felépülõ ennesek lesznek. Elsõ lépés tehát a $DOM$ meghatározása. Ezután egy $for$-ciklussal végigmehetünk  az ennek elemeibõl mint komponensekbõl képzett összes (a kifejezésnek megfelelõ dimenziójú) $v^{(n)}$ ennesen, és megvizsgáljuk, hogy kielégíti-e a kifejezést felépítõ formulát: ha igen, akkor megy az eredményhalmazba, különben eldobjuk és nézzük a következõ ennest.
+
+Ha kvantoros részformulához érünk, akkor annak igazságértékét a következõképpen határozzuk meg egy adott $v^{(n)}$-re. Meghatározzuk a doménjét, majd az ebbõl képzett $w^{(n)}$ enneseken egy beágyazott $for$-ciklussal végigmegyünk, és ellenõrizzük, hogy arra a $v^{(n)}$ ennesre, ahol a külsõ $for$-ciklus tart, és az aktuális $w^{(n)}$-re teljesül-e a belsõ formula minden ($\forall$) vagy legalább egy ($\exists$) iterációban.
+
+Több szintû kvantálás esetén ezt rekurzívan ismételjük.
+
+\subsubsection*{Készíts reláció-algebrai kifejezést egy halmaz legkisebb, illetve második legkisebb elemének kiválasztására! Mi az ennek megfelelõ sor- és oszlopkalkulus kifejezés?}
+Útmutatás: abból induljunk ki, hogy a halmaz legkisebb eleme olyan tulajdonságú, hogy nem létezik olyan elem, amely nála kisebb lenne. Ebbõl a sor- és oszlopkalkulus megoldás közvetlenül felírható.  A relációalgebra-kifejezésben pedig a halmaz önmagával vett Descartes szorzatából szûréssel és vetítéssel elõállíthatjuk azokat az elemeket, amelyiknél van kisebb\dots{}
+
+A második legkisebb hasonlóan végiggondolva, némileg hosszabb kifejezésekkel kapható.
+
+\subsubsection*{Mondjunk minél kacifántosabb helybenhagyó mûveleteket!}
+Még akkor is, ha csak egy mûveletet tartalmazó relációalgebrai kifejezéseket engedünk meg, számos példát találunk. Gondolhatunk a halmazelméletbõl örökölt idempotens kétoperandusú mûveletetekre: $A \bigcup A = A$ vagy $A \bigcap A = A$. De ilyen a természetes illesztés ($A \Join A = A$) is.
+
+Több mûvelet esetén a lehetõségek száma végtelen, ilyen tulajdonságú például: $$\pi_{\mbox{az egyik A oszlopai}}\left(A \times A\right)$$, vagy minden olyan szelekció is, ahol a feltétel minden ennesre teljesül: $$A = \sigma_{KOR<20}(A) \bigcup \sigma_{KOR \ge 20}(A)$$
+
+\subsubsection*{Mikor kényelmesebb a sor és mikor az oszlopkalkulus?}
+Természetesen mindig az, amelyikkel egyszerûbben, rövidebben felírhatjuk a probléma megoldását.
+
+A feladatmegoldásoknál láttuk, hogy az illesztéseket (\ref{sss:bjuti}.~fejezet), illetve azt, hogy egy, a relációnál rövidebb ennes eleme-e a reláció megfelelõ vetületének (\ref{sss:oszlopelem2}.~fejezet), az oszlopváltozók rugalmasabb kezelhetõsége miatt oszlopkalkulussal könnyebb (rövidebb) volt megfogalmazni. Ugyanakkor például, ha nagyon sok elemûek a relációk, rövidebb lehet, ha az egyes attribútumoknak megfelelõ sok oszlopváltozót helyett egyetlen, azokat összefogó sorváltozót, tehát sorkalkulust használunk.
+
+\subsubsection*{Egy Apa-Fia relációból keresd ki azokat, akik nem nagyapák!}
+Útmutatás: illesszük az $A$ relációt önmagához az $A_1.Fia$ és $A_2.Apa$ attribútumok mentén. Milyen relációt kaptunk így?
+
+\subsubsection*{Mely relációalgebrai mûveletek invertálhatók, és milyen módon az eredeti reláció(k) felhasználása nélkül?}
+
+Invertálhatóság alatt itt azt értjük, hogy csak az eredménybõl az összes eredeti relációk pontosan helyreállíthatóak. A helybenhagyó mûveletek nyilvánvalóan ilyenek, ezen kívül nézzük:
+
+\begin{itemize}
+	\item $A \bigcup B$, $A \neq B$: bár ennesek nem vesztek el, nem invertálható, hisz általános esetben nem tudjuk eldönteni, hogy az eredményhalmazban melyik ennes melyik relációból származik.
+	\item $A \bigcap B$, $A \neq B$: ennesek is elvesznek, nem invertálható.
+	\item $A \backslash B$, $B \neq \{\}$: ennesek is elvesznek, nem invertálható.
+	\item $\sigma_F(A)$, $F$ nem minden ennesre igaz: ennesek is elvesznek, nem invertálható.
+	\item $\pi_{\mbox{nem minden attribútum}}(A)$: oszlopok elvesznek, nem invertálható.
+	\item $A \times B$: invertálható a megfelelõ oszlopokra történõ vetítéssel.
+\end{itemize}
+
+Az utóbbihoz hasonló kacifántosabb invertálható \emph{kifejezéseket} is gyárthatunk. Arra kell figyelni, hogy ne vesszen el adatelem (attribútumérték), és meg tudjuk határozni, hogy az eredményben melyik adatelemet hova kell ``visszatenni''.
+
+\subsubsection*{Ha egy kifejezés biztonságos, akkor a negáltjáról mit mondhatunk, illetve ellenkezõ irányban mi a helyzet?}
+
+Lásd \aref{sec:biztonsagos}. fejezetben elején leírtakat!
+
+\subsubsection*{Soroljuk fel a sor- és oszlopkalkulus közötti átírás fõbb lépéseit!}
+
+Bizonyítható, hogy az átírás mindig elvégezhetõ, a bizonyítást, és az átírás lépéseit lásd: tankönyv, 42.~oldal.
+
+\subsubsection*{Miért szükséges a biztonságos sorkalkulus definíciójánál a két feltétel? Mondjunk példát olyan esetekre, ahol a kifejezés csak az egyiket teljesíti, mi ezekkel a probléma?}
+
+Ha nem teljesül mindkét feltétel, kiértékelési problémáink adódnak.
+
+Gondoljunk a naiv kiértékelési algoritmusra: bármelyik feltétel is nem teljesül, lesz egy olyan ciklus, amivel kezelhetetlen elemszámon kell végigiterálnunk (hiszen nem korlátozhatjuk a keresést a doménbeli ennesekre, mert így lehet, hogy elvesztünk megoldást (vagy hamis megoldásokat kapnánk), a ciklust minden $v \in A \times ... \times A$ ennesre el kell végezni.)
+
+Tehát vagy az eredmény, vagy egy (kvantoros részformula) részeredménye kezelhetetlen méretûvé nõ.
+
+\end{document} 
