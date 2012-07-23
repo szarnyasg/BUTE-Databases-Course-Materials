@@ -1,0 +1,399 @@
+% -*- coding: UTF-8 -*-
+\documentclass[a5paper]{article}
+\usepackage{t1enc}
+\usepackage{lmodern}
+\usepackage[utf8]{inputenc}
+\usepackage[magyar]{babel}
+\usepackage{anysize}
+
+\paperheight=21cm \paperwidth14.85cm
+\marginsize{12mm}{12mm}{12mm}{12mm} % {bal}{jobb}{fels#}{als?}
+
+\addtolength\topmargin{-\headheight} \addtolength\topmargin{-\headsep}
+\addtolength\textheight{\headheight} \addtolength\textheight{\headsep}
+\addtolength\textheight{\footskip}
+\footskip=15pt
+\ifx\pdfoutput\UnDefined \newcount\pdfoutput \fi
+\ifnum0<\pdfoutput
+  \pdfpagewidth\paperwidth \pdfpageheight\paperheight \pdfcompresslevel9
+\else \special{papersize=14.85cm,21cm} \fi
+
+\DeclareSymbolFont{AMSb}{U}{msb}{m}{n}%
+\DeclareSymbolFontAlphabet{\mathbb}{AMSb}%
+\DeclareSymbolFont{AMSa}{U}{msa}{m}{n}%
+\DeclareMathSymbol{\square}       {\mathord}{AMSa}{"03}%
+\DeclareMathSymbol{\blacksquare}  {\mathord}{AMSa}{"04}%
+\DeclareMathSymbol{\twoheadrightarrow}  {\mathrel}{AMSa}{"10}%
+
+\begin{document}
+
+\begingroup\makeatletter\lowercase{\endgroup
+  \def\@listi{% \begin{document} után kell!
+    \leftmargin=\leftmargini%
+    \topsep=5pt plus3pt minus1pt%
+    %\partopsep=0pt%
+    \parsep=0.5pt plus0.5pt minus0.5pt%
+    \itemsep=3pt plus3pt minus1pt%
+  }%
+}
+
+\noindent{\LARGE\sffamily\bfseries Relációs tervezés példák\hfill\vbox{%
+  \hsize=5.5cm\scriptsize%
+  \rm{}\hfill BME info99, 2001-12-07 v2\par
+  {}\hfill Szabó Péter {\tt <pts@inf.bme.hu>}\par
+  {}\hfill Javítások: \hfill BME info2008, 2012-06-23 v5\par
+  {}\hfill Szárnyas Gábor {\tt <szarnyas@db.bme.hu>}\par
+  }\par}
+
+\smallskip
+\hrule
+\smallskip
+
+A tankönyv oldalszámait $p$/$q$TK alakban jelölöm, ahol $q$ a 3. kiadásban szereplő oldalszám.
+
+A többértékű függések témája a BSc képzés anyagában nem szerepel, az ehhez kapcsolódó feladatokat {\bf *}-gal jelöltem.
+
+Az első néhány feladat szövege így kezdődik: Adott az $R$ relációs séma
+és a rajta értelmezett funkcionális és többértékű függőségek $F$ halmaza. Kérdések:
+
+\begin{itemize}
+
+\item mi a függéshalmaz lezárása ($F^+$)?
+\item adjuk meg a függéshalmaz egy minimális fedését!
+\item mik a szuperkulcsok?
+\item mik a kulcsok?
+\item mik az elsődleges attribútumok?
+\item mik a másodlagos attribútumok?
+\item melyik (legmagasabb) normálformában van?
+\item bontsuk függőségőrzően, veszteségmentesen 3NF-be (és esetleg 4NF-be)!
+\item bontsuk veszteségmentesen 4NF-be!{\bf *}
+
+\end{itemize}
+
+
+\let\toot\twoheadrightarrow
+\long\def\megoldas{\par\nobreak\smallskip\nobreak\noindent{\it Megoldás.}\enspace\ignorespaces}
+% vvv Imp: itt is hagyhassak szóközt...
+\newlength{\csillag}
+\settowidth{\csillag}{{\bf *}}
+\long\def\szam#1{\par\medskip\noindent{\bf #1.\hspace*{\csillag}}\quad\ignorespaces}
+\long\def\szampluszfeladat#1{\par\medskip\noindent{\bf #1.*}\quad\ignorespaces}
+
+\subsection*{Feladatok}
+
+%\begin{enumerate}
+
+%\item% 1
+\szam{0}
+$\hbox{\it RSZÓTÁR}(\hbox{\it SZERZŐ},\hbox{\it CÍM},\hbox{\it NYELV\/}^*)=
+R(SCN)$. %, $SC\to N^*$.
+
+\megoldas A függések lezárása üres.
+%Hozzáadva: "A reláció"
+A reláció 0NF-ben van, az egyetlen kulcs és szuperkulcs az egész $R$, minden
+ attribútum elsődleges. 1NF-be bontás: $\varrho=\{SC, SN\}$. Ez egyúttal 4NF
+is, mert nincs többértékű függőség és max 2 attribútum van. Függőségőrzés és
+veszteségmentesség garantált.
+
+%\item% 2
+\szam{1}
+$R(ABC)$, $B\to C$.
+
+\megoldas A függések lezárása $B\to C$, a minimális fedés is ez.
+$B$ minden szuperkulcsnak eleme, mert őt senki sem határozza meg. Hasonlóan
+A is. Tehát a szuperkulcsok: $ABC$ és $AB$, ezek közül csak $AB$ kulcs, mert
+belőle nem hagyható el attribútum, hogy még mindig szuperkulcs maradjon,
+$ABC$-ből viszont elhagyható ($C)$. Az elsődleges attribútumok a kulcsok elemei,
+tehát $A$ és $B$. $C$ másodlagos.
+
+1NF-ben van (mivel minden attribútum atomi), de nem 2NF, mert van olyan
+másodlagos attribútum ($C$), ami függ egy kulcs ($AB$) valódi részhalmazától
+($B$-től). A $\varrho=\{AB, BC\}$ felbontás függőségőrző (mivel az összes
+függőség ($B\to C$) következik a vetített függőségből ($B\to C$).
+Veszteségmentes is, a 83/89TK megjegyzése alapján ($R_1:=BC$, $R_2:=AB$). $AB$
+és $BC$ 4NF, mivel maximum két attribútumból állnak.
+
+\szam{2}
+$R(DOB)$, $D\to OB$, $O\to B$, $B\to O$.
+
+\megoldas A függéshalmaz lezárása: $D\to OB$, $D\to O$, $D\to B$, $O\to B$, $B\to O$
+és a triviálisak.
+A minimális fedés: $D\to O$, $O\to B$, $B\to O$.
+$D$ minden kulcsnak eleme, mert őt nem határozza meg senki.
+Viszont $D$ már önmagában kulcs, mert ő mindenkit meghatároz. Tehát az
+egyetlen kulcs $D$, a szuperkulcsok: $D$, $DO$, $DB$, $DOB$. $D$ elsődleges
+attribútum (mert eleme egy kulcsnak), $B$ és $O$ viszont nem.
+
+2NF-ben van (mert minden kulcs egyszerű), de nem 3NF, mert az $O\to B$
+függésben nem igaz, hogy ($O$ szuperkulcs vagy $B$ elsődleges). A minimális
+fedésből kiindulva a $\varrho_0=\{DO,DB,OB,BO,D\}$ felbontás 93/92TK alapján 3NF,
+függőségőrző és veszteségmentes. $\varrho_1$-ből $D$ elhagyható, mert
+részhalmaza egy másik részsémának ($DO$). Ugyanígy $BO$ is elhagyható. Tehát
+a $\varrho_1=\{DO,DB,OB\}$ is veszteségmentes, függőségőrző 3NF-be bontás.
+Mivel minden részséma max 2-elemű, és nincsenek többértékű függőségek,
+ezért 4NF is.
+
+Egy másik lehetséges veszteségmentes felbontás (BCNF-be, 94/93TK alapján):
+az $O\to B$ (a könyvben $X\to A$)
+függőség megsérti a BCNF tulajdonságot, mert $O$ nem szuperkulcs.
+$R_1:=XA=OB$, $R_2:=R\setminus A=DO$. A $\varrho_2=\{OB,DO\}$ felbontásnak
+minden részsémája BCNF, mert minden részséma max 2-elemű (és 4NF is, mert
+nincs többértékű függőség).
+Ez a felbontás veszteségmentes és függőségőrző, mert az $OB$-re vetített függőségek
+($F^+$ alapján!): $O\to B$, $B\to O$ és a triviálisak; a $DO$-ra vetített függőségek:
+$D\to O$ és a triviálisak; ezek uniójának lezártja ($O\to B$, $B\to O$,
+$D\to O$, $D\to B$ és a triviálisak) visszaadja a teljes $F^+$-t.
+
+94/93TK alapján máshogyan, $O\to B$-ből kiindulva is BCNF-be bonthatunk, az
+előzőekhez hasonlóan belátható (szimmetriaokokból), hogy ez is
+függőségőrző lesz.
+
+\szam{3}
+$S(MAJOR)$, $MR\to A$, $MAJ\to OM$, $MO\to RAJ$.
+
+\megoldas A továbbiakban egy $H$ halmaz bővítményein azokat a halmazokat
+értem, melyeknek $H$ részhalmaza. A függéshalmaz lezárása: $MO\to MAJOR$ és
+halmazai (értsd: $MO$ egy bővítménye meghatározza $MAJOR$-t és részhalmazait),
+$MR\to MAR$ és halmazai, $MAJ\to MAJOR$ és halmazai; és a triviálisak. Egy
+minimális fedés: $MR\to A$, $MAJ\to O$, $OM\to R$, $OM\to J$.
+
+A kulcsok: $MAJ$, $OM$, $MRJ$. Ezek tényleg szuperkulcsok és minimálisak.
+Több kulcs nincs, ugyanis bármely négyelemű attribútumhalmaz tartalmazza $OM$-et,
+ami kulcs, tehát ő nem lehet kulcs. Egyelemű kulcs nincs, mivel minden függőség
+bal oldala legalább kételemű. Maradnak tehát a kételemű és a háromelemű
+kulcsjelöltek (összesen ${5\choose 2} + {5\choose 3} = 20\,$db), ezeket kézzel ellenőrizve azt kapjuk, hogy nincs más kulcs. A
+szuperkulcsok a kulcsok bővítményei.
+
+Mindenki ($MAJOR$) elsődleges attribútum, mert mindenki eleme valamelyik
+kulcsnak. Másodlagos attribútum nincs, épp ezért 3NF. Viszont nem BCNF, mert
+$MR\to A$-ban $MR$ nem szuperkulcs. Az egyelemű $\varrho_1=\{MAJOR\}$
+felbontás triviálisan függőségőrző, veszteségmentes 3NF-be bontás.
+
+BCNF-be bontás (94/93TK alapján): $MR\to A$ az előzőek miatt sérti a BCNF
+tulajdonságot, bontsuk tehát $\{MAR,ROJM\}$-ra. A részsémákra vetített
+függőségek: $MR\to A$ és bővítményei és a triviálisak; illetve $OM\to RJ$
+és bővítményei és $MRJ\to O$ és bővítményei és a triviálisak. (Rögtön
+látszik, hogy a felbontás nem függőségőrző, mert újraegyesítéskor
+pl.\ $MAJ\to O$ elvész.) $MAR$ már BCNF, mert $MR\to A$-ban $MR$
+szuperkulcs. $ROJM$ is BCNF, mert $OM\to RJ$-ben $OM$ szuperkulcs és $MRJ\to
+O$-ban $MRJ$ szuperkulcs. Mindkét részséma 4NF, mert nincs többértékű
+függőség. Így tehát $\varrho_2=\{MAR,ROJM\}$ egy
+veszteségmentes, nem függőségőrző, 4NF-be bontás.
+
+\szampluszfeladat{B}
+$R(\hbox{\it TANTÁRGY},\hbox{\it OKTATÓ},\hbox{\it JEGYZET\/})=R(TOJ)$, $T\toot J$.
+
+\megoldas Mivel nincs funkcionális függőség, ezért a séma BCNF, a
+függéshalmaz lezárása és minimális fedése üres, csak a teljes $TOJ$
+szuperkulcs és kulcs, mindenki ($TOJ$) elsődleges.
+
+Vajon 4NF-e a séma? 97/97TK alapján a 4NF-be tartozás feltételét sérti
+$T\toot J$, mert $J$ nem üres, $J$ nem részhalmaza $T$-nek, $TJ$-n kívül
+van más attribútum is ($O$), és $T$ mégsem szuperkulcs. Bontsuk fel a sémát
+e sértő függőség alapján: $\varrho=\{TJ,TO\}$. Mindkét részséma 4NF, mert
+max két attribútumú. A felbontás veszteségmentes, hiszen ugyancsak 97/97TK
+alapján, $R_1=TJ$, $R_2=TO$ választással $(R_1\cap R_2=T)\toot
+(J=R_1\setminus R_2)$. A felbontás jelenleg függőségőrző, de ez általános
+esetben (csakúgy, mint BCNF-nél) nem garantálható.
+
+\szampluszfeladat{4}
+$R(\hbox{\it TANTÁRGY},\hbox{\it JEGYZET\/})=R(TJ)$, $T\toot J$.
+
+\megoldas Mivel nincs funkcionális függőség, ezért a séma BCNF, a
+függéshalmaz lezárása és minimális fedése üres, csak a teljes $TOJ$
+szuperkulcs és kulcs, mindenki ($TOJ$) elsődleges. Mivel max 2 attribútum
+van, ezért 4NF.
+
+\szam{5}
+$R(\hbox{\it VÁROS\/},\hbox{\it ÚT\/},\hbox{\it IR\char 95 SZÁM\/})=
+R(VUI)$. $VU\to I$, $I\to V$.
+
+\megoldas A függéshalmaz lezárása $VU\to$ bármi, $VUI\to$
+bármi, $I\to V$, $UI\to V$ és a triviálisak.
+%A minimális fedés $V\to I$, $U\to I$, $I\to V$.
+A minimális fedés $VU\to I$, $I\to V$.
+A szuperkulcsok $VUI$, $VU$, $UI$. Ezek között $VU$, $UI$ kulcs.
+Minden attribútum elsődleges.
+% $V$ és $U$ elsődleges attribútumok, $I$ másodlagos (mert nem eleme kulcsnak).
+
+3NF-ben van, mert $VU\to I$-ben $VU$ szuperkulcs, $I\to V$-ben pedig $V$
+elsődleges. Nincs BCNF-ben, mert $I\to V$-ben $I$ nem szuperkulcs.
+
+Legyen $\varrho=\{R_1, R_2\}$ egy nemtriviális veszteségmentes felbontása.
+Szimmetriaokokból feltehetjük, hogy $|R_1|\ge|R_2|$. A 88/87TK alján levő tétel
+miatt $R_1\cap R_2\supseteq VU$ vagy $R_1\cap R_2\supseteq I$. Az előbbi nem
+lehetséges (mert ellenkező esetben a nemtrivialitás miatt
+$R_1\not\supseteq R_2$, amit viszont nem tudunk elkerülni), tehát
+$R_1\cap R_2\supseteq I$. $|R_2|\ne1$ (mert ellenkező esetben $R_2=I$, és
+emiatt $R_1\supseteq R_2$, ami ellentmond a nemtrivialitásnak).
+$|R_1|\ne 3$ (mert ellenkező esetben szintén $R_1\supseteq R_2$ lenne),
+tehát $R_1$ és $R_2$ is kételemű, közös elem az $I$. $R_1\cup R_2=UVI$ miatt
+csak $R_1=UI$, $R_2=VI$ (vagy fordítva) lehetséges. Ez a felbontás valóban
+veszteségmentes, hiszen $(R_1\cap R_2=I)\to(V=R_2\setminus R_1)$. A
+részsémák BCNF-ek, mivel max 2 attribútumuk van.
+
+Vajon az egyetlen veszteségmentes BCNF-felbontás függőségőrző-e? A vetített
+függőségek lezártja $UI$-re csak a triviálisak, $VI$-re pedig $I\to V$ és a
+triviálisak. Ezek uniójának lezártja $I\to V$ és a triviálisak. A $VU\to I$
+függőség elveszett, tehát a felbontás nem függőségőrző. Ezzel beláttuk, hogy
+a séma nem bontható fel veszteségmentesen és függőségőrzően BCNF-be (tehát
+4NF-be sem).
+
+\szam{7}
+Adjunk példát olyan sémára, ami 0NF, de nem 1NF.
+\megoldas A 0.\ feladat példája megfelelő. Egyébként bármely, nem atomi
+attribútumot tartalmazó séma megteszi.
+
+
+\szam{8}
+Adjunk példát olyan sémára, ami 1NF, de nem 2NF (és nem 0NF).
+\megoldas Az 1.\ feladat példája megfelelő.
+
+Megjegyzés: a feladotot helyesebb lenne úgy kitűzni, hogy ,,adjunk példát
+olyan sémára és a rajta értelmezett függőségekre\ldots''
+
+
+\szam{9}
+Adjunk példát olyan sémára, ami 2NF, de nem 3NF.
+\megoldas A 2.\ feladat példája megfelelő.
+
+\szam{10}
+Adjunk példát olyan sémára, ami 3NF, de nem BCNF.
+\megoldas A 3.\ feladat példája megfelelő.
+
+\szam{11}
+Adjunk példát olyan sémára, ami BCNF, de nem 4NF.
+\megoldas A B.\ feladat példája megfelelő.
+
+\szam{12}
+Adjunk példát olyan sémára, ami 1NF.
+\megoldas
+Bármely, csak atomi attribútumokat tartalmazó séma megteszi, pl.\ $R(AB)$,
+$A\to B$.
+
+\szam{13}
+Adjunk példát olyan sémára, ami 2NF.
+\megoldas Bármely, legfeljebb 2 attribútumot tartalmazó séma, vagy csak
+egyszerű kulcsokat tartalmazó séma, vagy csak elsődleges attribútumokat
+tartalmazó séma megteszi, pl.\ $R(AB)$, $A\to B$.
+
+\szam{14}
+Adjunk példát olyan sémára, ami 3NF.
+\megoldas Bármely, legfeljebb 2 attribútumot tartalmazó séma, vagy
+baloldalon csak szuperkulcsokat tartalmazó séma, vagy csak elsődleges
+attribútumokat tartalmazó séma megteszi, pl.\ $R(AB)$, $A\to B$.
+
+\szam{15}
+Adjunk példát olyan sémára, ami BCNF.
+\megoldas Bármely, legfeljebb 2 attribútumot tartalmazó séma, vagy
+baloldalon csak szuperkulcsokat tartalmazó séma megteszi,
+pl.\ $R(AB)$, $A\to B$.
+
+\szampluszfeladat{16}
+Adjunk példát olyan sémára, ami 4NF.
+\megoldas Bármely, legfeljebb 2 attribútumot tartalmazó séma, vagy
+baloldalon csak szuperkulcsokat tartalmazó séma megteszi,
+pl.\ $R(AB)$, $A\toot B$.
+
+
+\szam{17}
+Adjunk példát olyan sémára, ami 2NF, de nem 1NF.
+\megoldas Ilyen séma nincsen, mert a 2NF definíciójánál kikötöttük, hogy
+1NF-nek kell lennie.
+
+\szam{18}
+Adjunk példát olyan sémára, ami 3NF, de nem 2NF.
+\megoldas Ilyen séma nincsen, 84/84TK alján/tetején ez be is van bizonyítva. Itt is
+bebizonyítom. Tegyük fel, hogy mégis van ilyen $R$ séma. $R$ nem 2NF, tehát
+(a 2NF definíciója alapján) van olyan $A$ másodlagos attribútuma, amely
+függ $R$ valamely $X$ kulcsának valamely $Y$ valódi részhalmazától.
+$X\to Y$ (mert $X$ kulcs).
+$Y\not\to X$ (mert $Y\to X$ esetén $Y$ mindenkit meghatározna,
+tehát szuperkulcs lenne, tehát tartalmazna egy $Z$ kulcsot, de ekkor $X$ nem
+lenne minimális $X\supset Y\supseteq Z$ miatt).
+$Y\to A$ (mert feltettük)
+$A\not\in Y$ (mert $A\in Y\subset X$ esetén $A\in X$, $A$ elsődleges lenne).
+A fentiek miatt
+viszont $A$ és $X$ létezése ellentmond a 3NF első definíciójának
+(83/82TK).\hfill$\square$
+
+\szam{19}
+Adjunk példát olyan sémára, ami BCNF, de nem 3NF.
+\megoldas Ilyen séma nincsen. Bizonyítás. Egy BCNF séma minden nemtriviális
+$X\to A$ függőségére
+igaz (a BCNF második definíciója, 85/84TK miatt), hogy $X$ szuperkulcs. Ez
+viszont azt jelenti, hogy az $X\to A$ függőség kielégíti a 3NF második
+definíciójának feltételét (nevezetesen: $X$ szuperkulcs vagy $A$ másodlagos).
+Tehát a séma 3NF is.$\hfill\square$
+
+Megjegyzés: az első definíciókból is azonnal látszik.
+
+\szampluszfeladat{20}
+Adjunk példát olyan sémára, ami 4NF, de nem BCNF.
+\megoldas Ilyen séma nincsen. Bizonyításvázlat: a két szuperkulcsos
+definíciót kell figyelembe venni (85/84TK és 97/97TK). A BCNF definícióját
+értelemszerűen terjesszük ki $X\to A$-ról $X\to Y$-ra.
+Ha $|\Omega|>|XY|$ a BCNF-re nem teljesül, akkor $X$ máris szuperkulcs,
+készen vagyunk. Vegyük figyelembe, hogy $X\to Y$-ból következik, hogy
+$X\toot Y$ (például úgy, hogy a többértékű függőség 97/96TK definíciójában
+$t_4:=t_1$, $t_3:=t_2$-t választunk).
+
+
+\szam{21}
+Adjunk példát olyan sémára, amely nem 2NF, de felbontható veszteségmentesen
+és függőségőrzően 2NF-be.
+\megoldas Az 1.\ feladat példája megfelelő. Ott egy felbontást is megadtunk
+(4NF-be, amiből már következik, hogy 2NF).
+
+\szam{22}
+Adjunk példát olyan sémára, amely nem 3NF, de felbontható veszteségmentesen
+és függőségőrzően 3NF-be.
+\megoldas Az 1.\ és a 2.\ feladatok példái megfelelők. Ott a felbontást is
+megadtunk (4NF-be is, amiből már következik, hogy 3NF).
+
+\szam{23}
+Adjunk példát olyan sémára, amely nem BCNF, de felbontható veszteségmentesen
+és függőségőrzően BCNF-be.
+\megoldas Az 1.\ és a 2.\ feladatok példái megfelelők. Ott a felbontást is
+megadtunk (4NF-be is, amiből már következik, hogy BCNF).
+
+\szampluszfeladat{24}
+Adjunk példát olyan sémára, amely nem 4NF, de felbontható veszteségmentesen
+és függőségőrzően 4NF-be.
+\megoldas Az 1.\ és a 2.\ feladatok példái megfelelők. Ott a felbontást is
+megadtunk.
+
+
+\szam{25}
+Adjunk példát olyan sémára, amely nem 2NF, és nem is bontható fel
+veszteségmentesen és függőségőrzően 2NF-be.
+\megoldas Nincs ilyen séma, a 92/92TK alján/tetején levő tétel miatt mindenkinek
+létezik veszteségmentes és függőségőrző felbontása 3NF-be, tehát 2NF-be is.
+
+\szam{26}
+Adjunk példát olyan sémára, amely nem 3NF, és nem is bontható fel
+veszteségmentesen és függőségőrzően 3NF-be.
+\megoldas Nincs ilyen séma, a 92/92TK alján/tetején levő tétel miatt mindenkinek
+létezik veszteségmentes és függőségőrző felbontása 3NF-be.
+
+\szam{27}
+Adjunk példát olyan sémára, amely nem BCNF, és nem is bontható fel
+veszteségmentesen és függőségőrzően BCNF-be.
+\megoldas Az 5.\ feladat példája megfelelő. Ott az állítást be is
+bizonyítottuk.
+
+\szampluszfeladat{28}
+Adjunk példát olyan sémára, amely nem 4NF, és nem is bontható fel
+veszteségmentesen és függőségőrzően 4NF-be.
+\megoldas Az 5.\ feladat példája megfelelő. Ott az állítást be is
+bizonyítottuk (BCNF-re, de ha valaki nem BCNF, akkor 4NF se lehet).
+
+\szampluszfeladat{29}
+Adjunk példát olyan sémára, amely nem bontható fel veszteségmentesen 4NF-be.
+\megoldas Ilyen séma nincsen, lásd a 98/97TK tetején/közepén levő megjegyzést. Annak
+bizonyítása, hogy mindenki felbontható, hasonlóan megy mint BCNF-re:
+rekurzívan mindig két részre vágjuk, lásd még 97/97TK.
+
+%\end{enumerate}
+
+\end{document}
