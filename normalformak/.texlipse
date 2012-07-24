@@ -1,0 +1,14 @@
+#TeXlipse project settings
+#Tue Jul 24 11:13:52 CEST 2012
+markTmpDer=true
+builderNum=2
+outputDir=
+makeIndSty=
+bibrefDir=
+outputFormat=pdf
+tempDir=tmp
+mainTexFile=normalformak.tex
+outputFile=normalformak.pdf
+langSpell=hu
+markDer=true
+srcDir=

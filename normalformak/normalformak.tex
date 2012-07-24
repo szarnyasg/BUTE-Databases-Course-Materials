@@ -1,0 +1,86 @@
+\documentclass[11pt]{article}
+
+\usepackage[latin2]{inputenc}
+\usepackage{t1enc}
+\usepackage{enumerate}
+\usepackage[english,magyar]{babel}
+\usepackage{ae}
+\usepackage{aecompl}
+\usepackage{indentfirst}
+\usepackage[paper=a4paper,bindingoffset=0cm,left=2cm,top=2cm,right=2cm,bottom=2cm,nohead]{geometry}
+\usepackage{setspace}
+\usepackage[pdftex]{graphicx}
+\usepackage{epstopdf}
+\usepackage{amsthm}
+\usepackage{longtable}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{color}
+\usepackage{tabto}
+\usepackage{hyperref}
+
+\setlength\parindent{1cm}
+\onehalfspacing
+\frenchspacing
+
+\def\ip{^{\mathcal{I}_p}}
+\def\i#1{^{\mathcal{I}_{#1}}}
+\def\I#1{{\mathcal{I}_{#1}}}
+
+\def\NF#1{$\mathrm{#1NF}$}
+\def\BCNF{$\mathrm{BCNF}$}
+
+\begin{document}
+
+\author{Szárnyas Gábor \\ \href{mailto:szarnyas@db.bme.hu}{\nolinkurl{szarnyas@db.bme.hu}}}
+\title{Adatbázisok\\Normálformák}
+\maketitle
+
+\section{Defin\'{i}ciók tömören}
+
+% tabto package kell hozza
+\begin{itemize}
+	\item \NF2:      \tabto{2cm} \NF1 és $\forall K$ kulcs \tabto{5.0cm} $\forall A \in R$ másodlagos: \tabto{8.7cm} $A$ teljesen függ $K$-tól.
+	\item \NF3/i.:   \tabto{2cm} \NF1 és $\forall K$ kulcs \tabto{5.0cm} $\forall A \in R$ másodlagos: \tabto{8.7cm} $A$ nem függ tranzitívan $K$-tól.
+	\item \BCNF/i.:  \tabto{2cm} \NF1 és $\forall K$ kulcs \tabto{5.0cm} $\forall A \in R$: \tabto{8.7cm} $A$ nem függ tranzitívan $K$-tól.
+	\item \NF3/ii.:  \tabto{2cm} \NF1 és $\forall X \subseteq R$ \tabto{5.0cm} $\forall A \in R$, $X \rightarrow{} A$ nemtriviális: $X$ szuperkulcs$\,\vee A$ elsõdleges.
+	\item \BCNF/ii.: \tabto{2cm} \NF1 és $\forall X \subseteq R$ \tabto{5.0cm} $\forall A \in R$, $X \rightarrow{} A$ nemtriviális: $X$ szuperkulcs.
+\end{itemize}
+
+\section{Történet}
+
+A 2NF és a 3NF/i. definíciót Edgar F. Codd publikálta 1971-ben \cite{3NF1}. A BCNF-et Raymond F. Boyce és Codd alkotta meg a 3NF táblákban elõforduló anomáliák megszüntetésére 1974-ben \cite{BCNF1} a BCNF/ii. definícióval. Érdekesség, hogy a koncepció már Ian Heath 1971-es cikkében megjelent \cite{Heath}. A 3NF második definícióját Carlo Zaniolo fogalmazta meg 1982-ben \cite{3NF2}:
+\begin{quotation}
+A relation R is BCNF if for every nontrivial FD of R, X $\rightarrow$ A, X
+is a superkey for R.
+
+[\ldots]
+
+LEMMA 3. A relation R is 3NF iff for every nontrivial FD of R, X $\rightarrow$ A,\\
+(a) X is a superkey for R, or\\
+(b) A is a key attribute for R.
+
+[\ldots]
+
+The preceding lemmas provide new and simpler definitions of 3NF. Most
+important, {\it they reveal an analogy between the definitions of 3NF and BCNF
+which was not previously known}: the two definitions are identical except for (b),
+which waives condition (a) for key attributes. Thus, if we keep condition (a)
+unchanged but relax (b), we obtain a normal form definition which is stricter
+than 3NF but weaker than BCNF.
+\end{quotation}
+
+További normál formák: Ronald Fagin 1977-ben megalkotta a 4NF-et a többértékû függõségek ({\it multivalued dependency}), 1979-ben az 5NF-et az elágazó függõségek ({\it join dependency}) okozta redundancia megszüntetésére. További normál formák: Fagin, DKNF (Domain/key normal form), 1981; Date--Darwen--Lorentzos, 6NF, 2002.
+
+\section{Normálformák ellenõrzése}
+
+\ldots
+
+\begin{thebibliography}{9}
+  \bibitem{3NF1} Codd, E.F. {\it Further Normalization of the Data Base Relational Model.}, IBM Research Report RJ909 (August 31st, 1971). Republished in Randall J. Rustin (ed.), Data Base Systems: Courant Computer Science Symposia Series 6. Prentice--Hall, 1972.
+  \bibitem{BCNF1} Codd, E. F. {\it Recent Investigations into Relational Data Base Systems.} IBM Research Report RJ1385 (April 23rd, 1974). Republished in Proc. 1974 Congress (Stockholm, Sweden, 1974). New York, N.Y.: North--Holland (1974).
+  \bibitem{Heath} Heath, I. {\it Unacceptable File Operations in a Relational Database.} Proc. 1971 ACM SIGFIDET Workshop on Data Description, Access, and Control, San Diego, Calif. (November 11th--12th, 1971).
+  \bibitem{3NF2} Zaniolo, Carlo. {\it A New Normal Form for the Design of Relational Database Schemata.} ACM Transactions on Database Systems 7(3), September 1982.
+\end{thebibliography}
+
+\end{document} 
