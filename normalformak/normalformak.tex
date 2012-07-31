@@ -7,7 +7,7 @@
 \usepackage{ae}
 \usepackage{aecompl}
 \usepackage{indentfirst}
-\usepackage[paper=a4paper,bindingoffset=0cm,left=2cm,top=2cm,right=2cm,bottom=2cm,nohead]{geometry}
+\usepackage[paper=a4paper,bindingoffset=0cm,left=1cm,top=1cm,right=1cm,bottom=1cm,nohead]{geometry}
 \usepackage{setspace}
 \usepackage[pdftex]{graphicx}
 \usepackage{epstopdf}
@@ -19,7 +19,8 @@
 \usepackage{tabto}
 \usepackage{hyperref}
 
-\setlength\parindent{1cm}
+%\setlength\parindent{1cm}
+\setlength\parindent{0cm}
 \onehalfspacing
 \frenchspacing
 
@@ -47,18 +48,30 @@
 	\item \BCNF/ii.: \tabto{2cm} \NF1 és $\forall X \subseteq R$ \tabto{5.0cm} $\forall A \in R$, $X \rightarrow{} A$ nemtriviális: $X$ szuperkulcs.
 \end{itemize}
 
+
+\section{Normálformák ellenõrzése}
+
+Tipikus feladat, hogy egy adott $R$ sémáról, a sémán értelmezett $F$ függéshalmaz mellett állapítsuk meg, hogy hányadik normálformában van. Feltételezzük, hogy a séma attribútumai atomiak, tehát a séma 1NF. Célszerû a vizsgálatot az erõsebb, szigorúbb feltételeket elõíró normálformákkal kezdve végezni. Ekkor, ha azt találtuk, hogy a séma egy adott normálformában van, nem kell tovább vizsgálódnunk (pl. ha a séma 3NF, akkor nem kell megvizsgálnunk, hogy 2NF-e, mert ezt tétel garantálja), ráadásul elõször a könnyebb vizsgálatokat kell elvégeznünk. 
+
+\begin{description}
+  \item[BCNF] Belátható, hogy elég az $F$-beli nemtriviális függõségek bal oldalának lezártját kiszámítani \cite{SD}: ha mindegyik visszaadja a teljes $R$ sémát (azaz szuperkulcs), akkor a séma BCNF, különben nem. Ez a lépés gyorsan végrehajtható, mert nem kell meghatározni a séma kulcsait.
+  \item[3NF] Határozzuk meg a kulcsokat és a kulcsokból az elsõdleges attribútumokat. Itt is elég az $F$-beli, $X \rightarrow A$ $(X \subseteq R, A \in R)$ alakúra hozott nemtriviális függõségekre megvizsgálni, hogy a bal oldal szuperkulcs és/vagy a jobboldalon elsõdleges attribútum áll: ha mindegyik függõség ilyen, akkor a séma 3NF, különben nem. 
+  \item[2NF] Itt már nem elég $F$ vizsgálata.\footnote{Pl. $R(ABCD), F = \{B \rightarrow C, C \rightarrow B, BC \rightarrow D\}$ esetén a kulcsok halmaza $\{AB, AC\}$, így az elsõdleges attribútumok $ABC$, az egyetlen másodlagos attribútum $D$. Egyik $F$-beli függõség sem sérti a 2NF feltételt, pedig a $D$ másodlagos attribútum függ $B$-tõl és $C$-tõl is, amelyek a kulcs részhalmazai.} Egy lehetséges, de nagyon költséges megoldás az $F^+$-beli nemtriviális függõségek vizsgálata. Ehelyett célszerû minden másodlagos attribútumra megvizsgálni, hogy függ-e bármely kulcs bármely {\it valódi} részhalmazától: ehhez vizsgáljuk meg a kulcsok valódi részhalmazainak lezártját. Ha mindig nemleges választ kapunk, a séma 2NF, különben 1NF.\footnote{A 2NF ellenõrzéséhez átlagosan szükséges lépések számát csökkenthetjük, ha elõször megvizsgáljuk az $F$-beli függõségekre a definíció teljesülését: ha találunk olyan függõséget, amely sérti a feltételt (a bal oldalon kulcs részhalmaza áll, a jobb oldalon másodlagos attribútum), akkor a séma 1NF. A kulcsok valódi részhalmazainak vizsgálatára csak akkor van szükség, ha tudjuk, hogy a séma nem 3NF és egyik $F$-beli függõsége sem sérti a feltételt.}
+\end{description}
+
 \section{Történet}
 
 A 2NF és a 3NF/i. definíciót Edgar F. Codd publikálta 1971-ben \cite{3NF1}. A BCNF-et Raymond F. Boyce és Codd alkotta meg a 3NF táblákban elõforduló anomáliák megszüntetésére 1974-ben \cite{BCNF1} a BCNF/ii. definícióval. Érdekesség, hogy a koncepció már Ian Heath 1971-es cikkében megjelent \cite{Heath}. A 3NF második definícióját Carlo Zaniolo fogalmazta meg 1982-ben \cite{3NF2}:
+
 \begin{quotation}
-A relation R is BCNF if for every nontrivial FD of R, X $\rightarrow$ A, X
-is a superkey for R.
+A relation $R$ is BCNF if for every nontrivial FD\footnote{functional dependency} of $R$, $X \rightarrow A$, $X$
+is a superkey for $R$.
 
 [\ldots]
 
-LEMMA 3. A relation R is 3NF iff for every nontrivial FD of R, X $\rightarrow$ A,\\
-(a) X is a superkey for R, or\\
-(b) A is a key attribute for R.
+LEMMA 3. A relation $R$ is 3NF iff\footnote{if and only if} for every nontrivial FD of $R$, $X \rightarrow A$,\\
+(a) $X$ is a superkey for $R$, or\\
+(b) $A$ is a key attribute for $R$.
 
 [\ldots]
 
@@ -70,17 +83,14 @@ unchanged but relax (b), we obtain a normal form definition which is stricter
 than 3NF but weaker than BCNF.
 \end{quotation}
 
-További normál formák: Ronald Fagin 1977-ben megalkotta a 4NF-et a többértékû függõségek ({\it multivalued dependency}), 1979-ben az 5NF-et az elágazó függõségek ({\it join dependency}) okozta redundancia megszüntetésére. További normál formák: Fagin, DKNF (Domain/key normal form), 1981; Date--Darwen--Lorentzos, 6NF, 2002.
-
-\section{Normálformák ellenõrzése}
-
-\ldots
+További normálformák: Ronald Fagin 1977-ben megalkotta a 4NF-et a többértékû függõségek ({\it multivalued dependency}), 1979-ben az 5NF-et az elágazó függõségek ({\it join dependency}) okozta redundancia megszüntetésére. További normálformák: Fagin, DKNF (Domain/key normal form), 1981; Date--Darwen--Lorentzos, 6NF, 2002.
 
 \begin{thebibliography}{9}
   \bibitem{3NF1} Codd, E.F. {\it Further Normalization of the Data Base Relational Model.}, IBM Research Report RJ909 (August 31st, 1971). Republished in Randall J. Rustin (ed.), Data Base Systems: Courant Computer Science Symposia Series 6. Prentice--Hall, 1972.
   \bibitem{BCNF1} Codd, E. F. {\it Recent Investigations into Relational Data Base Systems.} IBM Research Report RJ1385 (April 23rd, 1974). Republished in Proc. 1974 Congress (Stockholm, Sweden, 1974). New York, N.Y.: North--Holland (1974).
   \bibitem{Heath} Heath, I. {\it Unacceptable File Operations in a Relational Database.} Proc. 1971 ACM SIGFIDET Workshop on Data Description, Access, and Control, San Diego, Calif. (November 11th--12th, 1971).
   \bibitem{3NF2} Zaniolo, Carlo. {\it A New Normal Form for the Design of Relational Database Schemata.} ACM Transactions on Database Systems 7(3), September 1982.
+  \bibitem{SD} {\it Informatikai algoritmusok 1.,} Demetrovics János, Sali Attila, {\it Relációs adatmodellek tervezése,} \mbox{ELTE} Informatikai Kara, 2005., \url{http://compalg.inf.elte.hu/~tony/Elektronikus/Informatikai/}
 \end{thebibliography}
 
 \end{document} 
