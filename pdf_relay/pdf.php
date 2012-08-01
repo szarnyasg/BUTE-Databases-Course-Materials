@@ -1,4 +1,4 @@
-<?
+<?php
   function flushPDF($url, $filename) {
     header('Content-type: application/pdf');
     header('Content-Disposition: inline; filename="'.$filename.'"');
